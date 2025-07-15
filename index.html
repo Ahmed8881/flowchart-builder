@@ -209,8 +209,20 @@
             border-bottom: 5px solid transparent;
         }
 
+        .arrow.left {
+            border-right: 10px solid #333;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+
         .arrow.down {
             border-top: 10px solid #333;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+
+        .arrow.up {
+            border-bottom: 10px solid #333;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
         }
@@ -414,44 +426,93 @@
 
         function drawConnection(fromNode, toNode) {
             const flowchart = document.getElementById('flowchart');
-            const nodeWidth = 120;
-            const nodeHeight = 50;
+            const nodeWidth = 150;
+            const nodeHeight = 60;
 
-            const fromX = fromNode.x + nodeWidth / 2;
-            const fromY = fromNode.y + nodeHeight / 2;
-            const toX = toNode.x + nodeWidth / 2;
-            const toY = toNode.y + nodeHeight / 2;
+            // Calculate connection points at the edges of nodes
+            let fromX, fromY, toX, toY;
+            
+            const fromCenterX = fromNode.x + nodeWidth / 2;
+            const fromCenterY = fromNode.y + nodeHeight / 2;
+            const toCenterX = toNode.x + nodeWidth / 2;
+            const toCenterY = toNode.y + nodeHeight / 2;
 
-            // Simple straight line connection
-            if (Math.abs(fromX - toX) > Math.abs(fromY - toY)) {
+            // Determine connection direction and edge points
+            const deltaX = toCenterX - fromCenterX;
+            const deltaY = toCenterY - fromCenterY;
+
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
                 // Horizontal connection
+                if (deltaX > 0) {
+                    // Left to right
+                    fromX = fromNode.x + nodeWidth;
+                    fromY = fromCenterY;
+                    toX = toNode.x;
+                    toY = toCenterY;
+                } else {
+                    // Right to left
+                    fromX = fromNode.x;
+                    fromY = fromCenterY;
+                    toX = toNode.x + nodeWidth;
+                    toY = toCenterY;
+                }
+
+                // Draw horizontal line
                 const line = document.createElement('div');
                 line.className = 'connection horizontal';
                 line.style.left = `${Math.min(fromX, toX)}px`;
-                line.style.top = `${fromY}px`;
+                line.style.top = `${fromY - 1.5}px`;
                 line.style.width = `${Math.abs(toX - fromX)}px`;
                 flowchart.appendChild(line);
 
-                // Arrow
+                // Draw arrow
                 const arrow = document.createElement('div');
-                arrow.className = 'arrow right';
-                arrow.style.left = `${toX}px`;
-                arrow.style.top = `${toY - 5}px`;
+                if (deltaX > 0) {
+                    arrow.className = 'arrow right';
+                    arrow.style.left = `${toX - 10}px`;
+                    arrow.style.top = `${toY - 5}px`;
+                } else {
+                    arrow.className = 'arrow left';
+                    arrow.style.left = `${toX + 10}px`;
+                    arrow.style.top = `${toY - 5}px`;
+                }
                 flowchart.appendChild(arrow);
+
             } else {
                 // Vertical connection
+                if (deltaY > 0) {
+                    // Top to bottom
+                    fromX = fromCenterX;
+                    fromY = fromNode.y + nodeHeight;
+                    toX = toCenterX;
+                    toY = toNode.y;
+                } else {
+                    // Bottom to top
+                    fromX = fromCenterX;
+                    fromY = fromNode.y;
+                    toX = toCenterX;
+                    toY = toNode.y + nodeHeight;
+                }
+
+                // Draw vertical line
                 const line = document.createElement('div');
                 line.className = 'connection vertical';
-                line.style.left = `${fromX}px`;
+                line.style.left = `${fromX - 1.5}px`;
                 line.style.top = `${Math.min(fromY, toY)}px`;
                 line.style.height = `${Math.abs(toY - fromY)}px`;
                 flowchart.appendChild(line);
 
-                // Arrow
+                // Draw arrow
                 const arrow = document.createElement('div');
-                arrow.className = 'arrow down';
-                arrow.style.left = `${toX - 5}px`;
-                arrow.style.top = `${toY}px`;
+                if (deltaY > 0) {
+                    arrow.className = 'arrow down';
+                    arrow.style.left = `${toX - 5}px`;
+                    arrow.style.top = `${toY - 10}px`;
+                } else {
+                    arrow.className = 'arrow up';
+                    arrow.style.left = `${toX - 5}px`;
+                    arrow.style.top = `${toY + 10}px`;
+                }
                 flowchart.appendChild(arrow);
             }
         }
